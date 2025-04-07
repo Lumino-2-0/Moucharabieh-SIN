@@ -25,20 +25,34 @@ class myServo(object):  #lib my servo
 servo = myServo(15)  # Servo Pin
 servo.myServoWriteAngle(90)  # 180/2 = 90
 
-adc = ADC(Pin(36))     #Pin potentiometre
-adc.atten(ADC.ATTN_11DB)
-adc.width(ADC.WIDTH_10BIT)
+adc1 = ADC(Pin(36))     #Pin potentiometre 1
+adc1.atten(ADC.ATTN_11DB)
+adc1.width(ADC.WIDTH_10BIT)
+
+adc2 = ADC(Pin(35))     #Pin potentiometre 2
+adc2.atten(ADC.ATTN_11DB)
+adc2.width(ADC.WIDTH_10BIT)
 
 print("OHAYO MASTER! WATASHI WA ESP32")
 time.sleep(1)
 
 try:
     while True:
-        adc_value = adc.read()  # 0 - 1023
-        duty = int((adc_value / 1023) * (128 - 26)) + 26
+        adc1_value = adc1.read()  # 0 - 1023
+        duty = int((adc1_value / 1023) * (128 - 26)) + 26
         servo.myServoWriteDuty(duty)
-        print(f"Potentiometre: {adc_value} -> Angle: {duty}")
+        print(f"Potentiometre: {adc1_value} -> Angle: {duty}")
         time.sleep(0.1)
+    
+        adc2_value = adc2.read()
+        #1023/3 = 341
+        if adc2_value <= 341: 
+            print("1/3")
+        if adc2_value <= 682 and adc2_value >341:
+            print("2/3")
+        if adc2_value > 682:
+            print("3/3")
+        time.sleep(1)
+        
 except:
     servo.deinit()
-
