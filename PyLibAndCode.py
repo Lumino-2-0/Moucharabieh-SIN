@@ -39,9 +39,9 @@ time.sleep(1)
 try:
     while True:
         adc1_value = adc1.read()  # 0 - 1023
-        duty = int((adc1_value / 1023) * (128 - 26)) + 26
-        servo.myServoWriteDuty(duty)
-        print(f"Potentiometre: {adc1_value} -> Angle: {duty}")
+        angle = int((adc1_value / 1023) * 180)
+        servo.myServoWriteDuty(angle)
+        print(f"Potentiometre: {adc1_value} -> Angle: {angle}")
         time.sleep(0.1)
     
         adc2_value = adc2.read()
@@ -56,3 +56,4 @@ try:
         
 except:
     servo.deinit()
+    print("issue")
