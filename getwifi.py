@@ -13,7 +13,16 @@ wifi.connect(ssid, password)
 print("\n Connecté par WiFi!")
 print("Adresse IP :", wifi.ifconfig()[0])
 
+data = urequests.get("https://wttr.in/Paris?format=3")
+print(data.text) 
+#data.close()
 
-data = urequests.get("https://wttr.in/Saint-Nazaire?format=3")
-print(data.text)  # Exemple : "Paris: 🌦 +12°C"
-data.close()
+resultat = ""
+
+for char in data.text:
+    if char.isdigit():
+        resultat += char
+    elif resultat:
+        break
+
+print(resultat)
