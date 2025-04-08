@@ -10,19 +10,26 @@ wifi = network.WLAN(network.STA_IF)
 wifi.active(True)
 wifi.connect(ssid, password)
 
-print("\n Connecté par WiFi!")
+print("\n INTERNET OK")
 print("Adresse IP :", wifi.ifconfig()[0])
 
 data = urequests.get("https://wttr.in/Paris?format=3")
-print(data.text) 
+print(data.text)
 #data.close()
 
-resultat = ""
-
+tempEXTstr = ""
 for char in data.text:
     if char.isdigit():
-        resultat += char
-    elif resultat:
+        tempEXTstr += char
+    elif tempEXTstr:
         break
+print(tempEXTstr)
+tempEXTint = int(tempEXTstr)
 
-print(resultat)
+#je ferais le code du capteur soon
+capteurTempINTint = 21
+
+if capteurTempINTint > tempEXTint:
+    print("il fait plus chaud dedans")
+else:
+    print("il fait plus chaud dehors")
