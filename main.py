@@ -5,91 +5,54 @@ https://github.com/Lumino-2-0
 '''
 
 from machine import Pin,PWM,ADC    #--|
-import os                                   #  |--> Librairies nécessaires pour fonctionnement du code
-import time                        #--|
-
-
-#Pré-requi/Configuration du matériel
-sg90 = PWM(Pin(21, mode=Pin.OUT))   # Configuration du moteur et ses PINs (ici Pin 21 pour la sortie de donnée)
-sg90.freq(50)                      # Définition de la fréquence d'actualisation
-adc0 = ADC(0)                     # Configuration du light_sensor (capteur de lumière) en analogique sur le Port A0
+from servo import Servo
+from time import sleep
+from datetime import datetime, date, time, timedelta, timezone
 
 
 
-'''
-En Python et sur la Pi, l’angle du moteur est calculé comme un pourcentage du cycle. Ce pourcentage se nomme « Duty Cycle ».
 
-Un signal de 0.5ms correspond à 0° et un signal de 2.5ms à 180°. Sachant que notre cycle est de 50 Hz, soit 20ms, cela nous permet de calculer les Duty Cycle pour 0° et 180° comme ceci :
 
-x = 0.5 / 20
-y = 2.5 / 20
-On trouve alors que le Duty Cycle correspondant à 0° est 0.025, soit 2.5% et que celui correspondant à 180° est 0.125, soit 12.5%.
 
-DONC : 
-
-    0.5ms/20ms = 0.025 = 2.5% duty cycle
-    2.4ms/20ms = 0.12 = 12% duty cycle
-
-    0.025*65535=1638
-    0.12*65535=7864
+servo=Servo(pin=21, min=500, max=2500, max_angle=180) # Définition du servomoteur sur le GPIO 21 avec une largeur d'impulsion de 500 μs pour 0 degré et 2500 μs pour 180 degrés 
+adc0 = ADC(0)                                         # Configuration du light_sensor (capteur de lumière) en analogique sur le Port A0
 
 '''
-#Variable à initialiser 
-Semi_ANA = 4369                                   #Valeur (moyenne) pour la nuit (àm modifier selon les calibrages)
-Coucher_1 = 10000
-Coucher_2 = 1638
-Trop_lumineux = 64500
+Servo(pin, min, max)
+    pin: Le numéro du GPIO sur lequel est connecté le servomoteur.
+    min (optionnel) : la largeur d'impulsion, en microsecondes, correspondant à l'angle minimum (0 degré) du servo (par défaut 500).
+    max (optionnel) : la largeur d'impulsion, en microsecondes, correspondant à l'angle maximum (180 degrés) du servo (par défaut 2500).
+    max_angle (optionnel) : Angle maximum du servomoteur (par défaut 180).
 
-while True :
-    print("adc0=",adc0.read_u16())                 # Afficer les valeurs analogiques dans la console
+    On trouve ces informations sur la datasheet du servo c'est en μs.
+    FT5330M : min = 500, max = 2 500, neutre = 1 500. 
+    FS90 : min = 500, max = 2 500, neutre = 1 500. 
 
-    ANA_Lum = adc0.read_u16()                     # Variable qui est la valeur analogique actuelle
+'''
+mois =  datetime.now().date().month
 
-    if ANA_Lum < Semi_ANA :                     # Si la lumière atuelle [ANA_Lum] est en dessous de la lumière sombre (nuit) [Semin_ANA]
-        i = 0                             
-        while i == 1638 :
-            sg90.duty_u16(i)                     # Modifier la valeur du servo moteur (16bits) à 1638 ---|
-            i = i + 1                        # On augmente la valeur de 1 (pour le mouvement) ----|    A modifier selo les groupes (voir calcul ci-dessus)
-            time.sleep(0.01)                      # Attendre 0.01 seconde
+print(mois)
+while True:             #Faire de la boucle infinie
 
-    elif ANA_Lum < Coucher_1 and ANA_Lum > Coucher_2 : # Au  coucher du soleil
-        i = 0
-        while i == 4096 :
-            sg90.duty_u16(i)  
-            i = i + 1
-            time.sleep(0.01)
+    light_sensor = adc0.read_u16()                  # Lire la valeur du capteur de lumière actuelle
+    print("Luminosite Analogique : ", light_sensor) # Afficher la valeur du capteur de lumière
 
+    if light_sensor <= 1500:                        # Si la valeur du capteur de lumière est inférieure ou égale à 1500 (Presque la nuit / C'est la nuit)
+        servo.move(0)                               # Déplacer le servomoteur à 0 degré
+        print("Servo a 0 degres")                   # Afficher que le servomoteur est à 0 degré
+        sleep(0.50)                                 # Attendre 0.5 seconde
+    elif light_sensor >= 64500:                     # Si la valeur du capteur de lumière est supérieure ou égale à 64500 (Trop lumineux)
+        servo.move(180)                              # Déplacer le servomoteur à 90 degrés
+        print("Servo a 180 degres")                  # Afficher que le servomoteur est à 90 degrés
+        sleep(0.50)                                 # Attendre 0.5 seconde
+    else :
+        servo.move(90)                             # Déplacer le servomoteur à 180 degrés
+        print("Servo a 90 degres")                 # Afficher que le servomoteur est à 180 degrés
+        sleep(0.50)                                 # Attendre 0.5 seconde
     
-    elif ANA_Lum > Trop_lumineux :                # Si la lumière atuelle [ANA_Lum] est au dessus de la lumière trop lumineuse [Trop_lumineux]
-        i = 7864                            # On initialise la variable i à 7864 (180°) ----------------|
-        while i == 65535 :                     # On tourne le moteur jusqu'à 65535 (360°) -----------|
-            sg90.duty_u16(i)                     # Modifier la valeur du servo moteur (16bits) à 65535 --|
-            i = i - 1                        # On diminue la valeur de 1 (pour le mouvement) ----|    A modifier selo les groupes (voir calcul ci-dessus)
-            time.sleep(0.01)              # Attendre 0.01 seconde
-
-    else :                                 # Sinon...                                               | -> On tourne à 180° si besoins selon la position actuelle et la meteo
-        i = 0                           # On initialise la variable i à 1638 (0°) ----------------|
-        while i == 7864 :                     # On tourne le moteur jusqu'à 7864 (180°) --------------|
-            sg90.duty_u16(i)                     # Modifier la valeur du servo moteur (16bits) à 1638 --|
-            i = i - 1                        # On diminue la valeur de 1 (pour le mouvement) ----|    A modifier selo les groupes (voir calcul ci-dessus)
-            time.sleep(0.01)                      # Attendre 0.01 seconde
-    print("Valeur du moteur actuel : ", sg90.duty_u16)
-    time.sleep(0.1)                          # Attendre 0.1 seconde
+        
 
 
 '''
- .__                .__                                        
-                   |  |  __ __  _____ |__| ____   ____                           
-                   |  | |  |  \/     \|  |/    \ /  _ \                           # type: ignore
-                   |  |_|  |  /  Y Y  \  |   |  (  <_> )                          # type: ignore
-                   |____/____/|__|_|  /__|___|  /\____/                           # type: ignore
-                                    \/        \/                                  # type: ignore
-  _________                       ___.                  __                        # type: ignore
- /   _____/____    _____          \_ |__   ____________/  |______   __ _____  ___ # type: ignore
- \_____  \\__  \  /     \   ______ | __ \_/ __ \_  __ \   __\__  \ |  |  \  \/  / # type: ignore
- /        \/ __ \|  Y Y  \ /_____/ | \_\ \  ___/|  | \/|  |  / __ \|  |  />    <  # type: ignore
-/_______  (____  /__|_|  /         |___  /\___  >__|   |__| (____  /____//__/\_ \ # type: ignore
-        \/     \/      \/              \/     \/                 \/            \/ # type: ignore
-
-        L 
+Crédit à Mr Frank Sauret pour la librairie Servo.py
 '''
