@@ -12,6 +12,7 @@ import machine                                                   #|
 from servo import Servo                                          #| Modules nécessaires, ne pas toucher
 import struct                                                    #|
 import time                                                      #|
+import ntptime  
                                                                  #|
 #-----------------------------------------------------------------|
 
@@ -23,23 +24,23 @@ adc0  = machine.ADC(0)                                            # Configuratio
 ssid = 'REDMAGIC 9S Pro Lumino'                                   # Nom du réseau Wi-Fi
 password = '110908'                                               # Mot de passe du réseau Wi-Fi
 NTP_DELTA = 2208988800 + 3600 * 2                                 # Décalage NTP pour UTC+2 (France, Parid GMT+2), donc +2h = +7200 secondes
-host = "fr.pool.ntp.org"                                          # Serveur NTP à utiliser
+host = "ntp.unice.fr"                                             # Serveur NTP à utiliser
 #-----------------------------------------------------------------|
 
 
 
 '''Connexion au Wi-Fi'''
 #-----------------------------------------------------------------|
-def connect():
-    #Connect to WLAN
-    wlan = network.WLAN(network.STA_IF)
+def connect():                                                    # 
+
+    wlan = network.WLAN(network.STA_IF)                           #
     wlan.active(True)
     wlan.connect(ssid, password)
     while not wlan.isconnected():
-        print('Connection au Wifi...')
+        print('Connexion au Wifi...')
         time.sleep(1)
     print(wlan.ifconfig())
-    print('Connecté au Wifi !')
+    print('Connecte au Wifi !')
 #-----------------------------------------------------------------|
 
 '''Récupération de l'heure NTP'''
@@ -48,28 +49,42 @@ def connect():
 def set_time():
     NTP_QUERY = bytearray(48)
     NTP_QUERY[0] = 0x1B
-    addr = socket.getaddrinfo(host, 123)[0][-1]
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.settimeout(1)
-        res = s.sendto(NTP_QUERY, addr)
-        msg = s.recv(48)
-    finally:
-        s.close()
-    val = struct.unpack("!I", msg[40:44])[0]
-    t = val - NTP_DELTA    
-    tm = time.gmtime(t)
-    machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0))
+        addr = socket.getaddrinfo("ntp.unice.fr", 123)[0][-1]
+        print(f"Adresse IP résolue pour ntp.unice.fr : {addr}")
+    except Exception as e:
+        print(f"Erreur de résolution DNS pour ntp.unice.fr : {e}")
+        raise
+
+    for attempt in range(5):  # Réessayez jusqu'à 5 fois
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.settimeout(10)  # Augmentez le délai d'attente
+            print(f"Tentative {attempt + 1} de connexion au serveur NTP...")
+            s.sendto(NTP_QUERY, addr)
+            print(f"Requête envoyée au serveur {addr}. En attente de réponse...")
+            msg = s.recv(48)
+            val = struct.unpack("!I", msg[40:44])[0]
+            t = val - NTP_DELTA    
+            tm = time.gmtime(t)
+            machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0))
+            print("Heure mise à jour avec succès.")
+            return
+        except OSError as e:
+            print(f"Tentative {attempt + 1} échouée : {e}")
+        finally:
+            s.close()
+    raise Exception("Impossible de récupérer l'heure NTP après plusieurs tentatives.")
 #-----------------------------------------------------------------|
 
 
 
 ######################################################################################################################################
 '''                                                   Debug dans cette section :                                                   '''
-
-connect()                                                           # Connexion au Wi-Fi
-set_time()                                                          # Récupération de l'heure via NTP
-heure_actuelle = time.localtime()                                   # Obtenir l'heure actuelle
+connect()                                                        # Connexion au Wi-Fi
+print("Local time before synchronization：%s" %str(time.localtime()))
+ntptime.settime()
+print("Local time after synchronization：%s" %str(time.localtime()))
 
 ######################################################################################################################################
 
