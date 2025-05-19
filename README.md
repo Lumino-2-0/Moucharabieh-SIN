@@ -13,7 +13,7 @@ Pour exécuter le code, utilisez un IDE comme ***Visual Studio (Code)*** et inst
 
 ## Comment fonctionne-t-il ?
 
-Ce code va en premier lieu connecter la carte à un wifi *(à vous de mofifier la ligne de code comportant le SSDI et le Mot de passe)*.
+Ce code va en premier lieu connecter la carte à un wifi *(à vous de mofifier la ligne de code comportant le SSID et le Mot de passe)*.
 Ensuite, il se connectera à un serveur NTP permettant d'obtenir la date/heure/saison exacte actuel. Un exemple de serveur NTP connu est 
 > pool.ntp.org
 
