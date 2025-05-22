@@ -17,4 +17,4 @@ Ce code va en premier lieu connecter la carte à un wifi *(à vous de mofifier l
 Ensuite, il se connectera à un serveur NTP permettant d'obtenir la date/heure/saison exacte actuel. Un exemple de serveur NTP connu est 
 > pool.ntp.org
 
-Par la suite, il choisira plus précisemment l'angle de pivot a donner pour le servo moteur. De plus qu'il utilisera le capteur de luminosité pour régler l'ouverture du Moucharabieh.
+### Ce système a été mis en commentaire car plus fonctionnel dans le code pour un Raspberry Pi Pico W. Il peut être utilisé sur un ESP32
