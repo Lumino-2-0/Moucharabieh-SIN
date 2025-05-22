@@ -6,13 +6,10 @@ https://github.com/Lumino-2-0
 
 #-----------------------------------------------------------------|
                                                                  #|
-import network                                                   #|
-import socket                                                    #|
 import machine                                                   #|
 from servo import Servo                                          #| Modules nécessaires, ne pas toucher
-import struct                                                    #|
 import time                                                      #|
-import ntptime  
+#import ntptime                                                  #|
                                                                  #|
 #-----------------------------------------------------------------|
 
@@ -21,19 +18,19 @@ import ntptime
 #-----------------------------------------------------------------|
 servo = Servo(pin=21, min=500, max=2500, max_angle=180)           # Définition du servomoteur sur le GPIO 21 avec une largeur d'impulsion de 500 μs pour 0 degré et 2500 μs pour 180 degrés 
 adc0  = machine.ADC(0)                                            # Configuration du light_sensor (capteur de lumière) en analogique sur le Port A0
-ssid = 'REDMAGIC 9S Pro Lumino'                                   # Nom du réseau Wi-Fi
-password = '110908'                                               # Mot de passe du réseau Wi-Fi
-NTP_DELTA = 2208988800 + 3600 * 2                                 # Décalage NTP pour UTC+2 (France, Parid GMT+2), donc +2h = +7200 secondes
-host = "ntp.unice.fr"                                             # Serveur NTP à utiliser
+ssid = 'Lumastor'                                                 # Nom du réseau Wi-Fi (Inutile actuellement)
+password = '11092008'                                             # Mot de passe du réseau Wi-Fi (Inutile actuellement)
+NTP_DELTA = 2208988800 + 3600 * 2                                 # Décalage NTP pour UTC+2 (France, Parid GMT+2), donc +2h = +7200 secondes (inutile actuellement)
+host = "fr.pool.ntp.org"                                          # Serveur NTP à utiliser (inutile actuellement)
 #-----------------------------------------------------------------|
 
 
-
-'''Connexion au Wi-Fi'''
+#Décommenter cette section ainsi que toutes les parties necessaires à la connexion au serveur NTP si vous voulez tester (Normalment fonctionnel sur ESP32)
+'''Connexion au Wi-Fi
 #-----------------------------------------------------------------|
-def connect():                                                    # 
+def connect():                                                    
 
-    wlan = network.WLAN(network.STA_IF)                           #
+    wlan = network.WLAN(network.STA_IF)                           
     wlan.active(True)
     wlan.connect(ssid, password)
     while not wlan.isconnected():
@@ -43,9 +40,9 @@ def connect():                                                    #
     print('Connecte au Wifi !')
 #-----------------------------------------------------------------|
 
-'''Récupération de l'heure NTP'''
-#-----------------------------------------------------------------|
+Récupération de l'heure NTP
 
+#-----------------------------------------------------------------|
 def set_time():
     NTP_QUERY = bytearray(48)
     NTP_QUERY[0] = 0x1B
@@ -75,19 +72,35 @@ def set_time():
         finally:
             s.close()
     raise Exception("Impossible de récupérer l'heure NTP après plusieurs tentatives.")
+
 #-----------------------------------------------------------------|
 
+'''
+#Décommenter cette section ainsi que toutes les parties necessaires à la connexion au serveur NTP si vous voulez tester (Normalment fonctionnel sur ESP32)
 
 
 ######################################################################################################################################
-'''                                                   Debug dans cette section :                                                   '''
+'''                                                   Debug dans cette section :                                                   
 connect()                                                        # Connexion au Wi-Fi
-print("Local time before synchronization：%s" %str(time.localtime()))
-ntptime.settime()
-print("Local time after synchronization：%s" %str(time.localtime()))
+print("Date actuelle theorique avant synchro %s" %str(time.localtime()))
+try :
+    ntptime.settime()
+except OverflowError:
+            # it is not going to work
+            print("overflow error; settime is borked \n Retentative dans 5 secondes...")
+            time.sleep(5000)
+
+except OSError:
+            print(f"ntptime.settime() failure \n Retentative dans 5 secondes...")
+            # Not expecting more than 1 failure, maybe waiting will help?
+            time.sleep(5000)
+print("Date actuelle apres synchro %s" %str(time.localtime()))
+
+'''
+#Décommenter cette section ainsi que toutes les parties necessaires à la connexion au serveur NTP si vous voulez tester (Normalment fonctionnel sur ESP32)
+
 
 ######################################################################################################################################
-
 '''
 Description :
     On fait une boucle infinie qui va lire la valeur analogique envoyée par le capteur de lumière (Light_Sensor) et donc, qui peut varier entre 0 et 65535 selon la luminosité captée.
@@ -95,7 +108,7 @@ Description :
         - En hiver (mois 11, 12, 1, 2) : Si la luminosité est faible, on ouvre à fond.
         - En été (mois 5, 6, 7, 8) : Si la luminosité est trop forte, on réduit à moitié.
         - Sinon, on ajuste en fonction de la luminosité.
-'''
+
 
 try:
     while True:                                                               # Faire une boucle infinie
@@ -132,8 +145,52 @@ try:
         time.sleep(0.5)                                                       # Attendre 0.5 seconde avant la prochaine lecture
 except Exception as e:
     print("Erreur :", e)                                                      # Afficher l'erreur en cas de problème
+'''
+
+
+while True:                                                                   # Faire une boucle infinie
+    try:
+
+        light_sensor = adc0.read_u16()                                        # Lire la valeur du capteur de lumière actuelle
+        mois = time.localtime()[1]                                            # Obtenir le mois actuel
+
+        print("Luminosite Analogique : ", light_sensor)                       # Afficher la valeur du capteur de lumière
+
+
+        if light_sensor <= 1500:                                          # Si la luminosité est faible
+            angle_voulu = 0
+            angle_actuel = 180
+
+            while  angle_voulu == angle_actuel:
+                servo.move(angle_actuel)                                               # Déplacer le servomoteur à 180 degrés (ouverture maximale)
+                print("Servo a 0 degres (fermeture)")
+                angle_actuel = angle_actuel - 1
+                time.sleep(0.05)
+
+        elif light_sensor > 65000:
+            angle_voulu = 90
+            angle_actuel = 180
+            while angle_voulu == angle_actuel:
+                servo.move(angle_actuel)
+                print("Trop lumineux, fermeture legere")
+                angle_actuel = angle_actuel - 1
+                time.sleep(0.05)
+        else:
+            angle_actuel = 0
+            angle_voulu = 180
+            while angle_voulu == angle_actuel:
+                servo.move(angle_actuel)                                                # Sinon, ouverture partielle
+                print("Servo a 180 degres (ouverture max)")
+                angle_actuel = angle_actuel + 1
+                time.sleep(0.05)
+
+        time.sleep(0.2)
+
+    except Exception as e:
+        print("Erreur :", e)                                                      # Afficher l'erreur en cas de problème
+
 
 '''
 Crédit à Mr Frank Sauret pour la librairie Servo.py
-Je sais qu'il y a plus de commentaire que de code mais bon, le projet n'a pas vraiment besoins d'un code complexe.
+Je sais qu'il y a plus de commentaires que de code mais bon, le projet n'a pas vraiment besoins d'un code complexe.
 '''
