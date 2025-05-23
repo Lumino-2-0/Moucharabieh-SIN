@@ -153,36 +153,47 @@ while True:                                                                   # 
 
         light_sensor = adc0.read_u16()                                        # Lire la valeur du capteur de lumière actuelle
         mois = time.localtime()[1]                                            # Obtenir le mois actuel
-
+        print(f"Angle actuel du servo :", int(servo.current_angle))
         print("Luminosite Analogique : ", light_sensor)                       # Afficher la valeur du capteur de lumière
 
 
         if light_sensor <= 1500:                                          # Si la luminosité est faible
-            angle_voulu = 0
+
+            angle_voulu = 180
             angle_actuel = 180
+            if int(servo.current_angle) != 178 :
+                for i in range(1,angle_actuel):
+                    servo.move(angle_voulu)                                               # Déplacer le servomoteur à 180 degrés (ouverture maximale)
+                    print("Servo a 0 degres (fermeture)")
+                    angle_voulu = angle_voulu -2
+                    time.sleep(0.05)
+            else :
+                pass
 
-            while  angle_voulu == angle_actuel:
-                servo.move(angle_actuel)                                               # Déplacer le servomoteur à 180 degrés (ouverture maximale)
-                print("Servo a 0 degres (fermeture)")
-                angle_actuel = angle_actuel - 1
-                time.sleep(0.05)
-
-        elif light_sensor > 65000:
+        elif light_sensor >= 65000:                                                   # Sinon, ouverture partielle car trop lumineux
+            angle_actuel = 180
             angle_voulu = 90
-            angle_actuel = 180
-            while angle_voulu == angle_actuel:
-                servo.move(angle_actuel)
-                print("Trop lumineux, fermeture legere")
-                angle_actuel = angle_actuel - 1
-                time.sleep(0.05)
-        else:
+            if int(servo.current_angle) != angle_voulu :
+                for i in range(1,angle_voulu):
+                    servo.move(angle_actuel)
+                    print("Trop lumineux, fermeture legere")
+                    angle_actuel = angle_actuel - 1
+                    time.sleep(0.05)
+            else :
+                pass
+
+
+        else:                                                                         # Sinon on ouvre tout simplement
             angle_actuel = 0
             angle_voulu = 180
-            while angle_voulu == angle_actuel:
-                servo.move(angle_actuel)                                                # Sinon, ouverture partielle
-                print("Servo a 180 degres (ouverture max)")
-                angle_actuel = angle_actuel + 1
-                time.sleep(0.05)
+            if int(servo.current_angle) != 178 :
+                for i in range(1,angle_voulu):
+                    servo.move(angle_actuel)                                                
+                    print("Servo a 180 degres (ouverture max)")
+                    angle_actuel = angle_actuel + 1
+                    time.sleep(0.05)
+            else :
+                pass
 
         time.sleep(0.2)
 
