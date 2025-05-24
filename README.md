@@ -21,7 +21,7 @@ Ensuite, il se connectera à un serveur NTP permettant d'obtenir la date/heure/s
 
 ### Ce système a été mis en commentaire car plus fonctionnel dans le code pour un Raspberry Pi Pico W. Il peut être utilisé sur un ESP32
 
-##Objectif principal du projet de fin d'année:
+## Objectif principal du projet de fin d'année:
 
 *En hiver, favoriser l'impact du rayonnement solaire sur les vitrages pour optimiser les apports gratuits lorsqu'il y a du soleil et limiter les déperditions quand il n'y a pas d'apport solaire.*
 *En été, limiter l'impact du soleil sur les vitrages pour diminuer l'effet de serre et ainsi éviter les surchauffes.*
