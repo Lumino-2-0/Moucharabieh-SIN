@@ -19,7 +19,8 @@ Ensuite, il se connectera à un serveur NTP permettant d'obtenir la date/heure/s
 > fr.pool.ntp.org
 > time.google.com
 
-### Ce système a été mis en commentaire car plus fonctionnel dans le code pour un Raspberry Pi Pico W. Il peut être utilisé sur un ESP32
+### Ce système a été mis en commentaire car plus fonctionnel dans le code pour un Raspberry Pi Pico W depuis une mise à jour de MicroPython. 
+### Il peut être utilisé sur un ESP32 à la place.
 
 ## Objectif principal du projet de fin d'année:
 
