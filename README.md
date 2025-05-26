@@ -15,9 +15,9 @@ Pour exécuter le code, utilisez un IDE comme ***Visual Studio (Code)*** et inst
 
 Ce code va en premier lieu connecter la carte à un wifi *(à vous de mofifier la ligne de code comportant le SSID et le Mot de passe)*.
 Ensuite, il se connectera à un serveur NTP permettant d'obtenir la date/heure/saison exacte actuel. Des exemples de serveurs NTP connus sont: 
-> pool.ntp.org
-> fr.pool.ntp.org
-> time.google.com
+> - pool.ntp.org
+> - fr.pool.ntp.org
+> - time.google.com
 
 ### Ce système a été mis en commentaire car plus fonctionnel dans le code pour un Raspberry Pi Pico W depuis une mise à jour de MicroPython. 
 ### Il peut être utilisé sur un ESP32 à la place.
