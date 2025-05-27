@@ -149,7 +149,7 @@ except Exception as e:
 
 # Valeurs seuils pour la luminosité
 SEUIL_FAIBLE = 1500        # Trop sombre
-SEUIL_FORTE = 63000        # Trop lumineux
+SEUIL_FORTE = 64500        # Trop lumineux
 ANGLE_NUIT = 0
 ANGLE_JOUR = 180
 ANGLE_TROP_LUMINEUX = 90
@@ -176,7 +176,7 @@ while True:
 
         # Définir si le mouvement est autorisé selon les règles
         transition_valide = False
-        if (angle_actuel == ANGLE_JOUR and angle_voulu in [ANGLE_NUIT, ANGLE_TROP_LUMINEUX]) or \n           (angle_actuel == ANGLE_NUIT and angle_voulu == ANGLE_JOUR) or \n           (angle_actuel == ANGLE_TROP_LUMINEUX and angle_voulu == ANGLE_JOUR):
+        if (angle_actuel == ANGLE_JOUR and angle_voulu in [ANGLE_NUIT, ANGLE_TROP_LUMINEUX]) or (angle_actuel == ANGLE_NUIT and angle_voulu == ANGLE_JOUR) or (angle_actuel == ANGLE_TROP_LUMINEUX and angle_voulu == ANGLE_JOUR):
             transition_valide = True
         elif angle_actuel == angle_voulu:
             transition_valide = False  # Pas de mouvement nécessaire
