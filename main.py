@@ -18,10 +18,12 @@ import time                                                      #|
 #-----------------------------------------------------------------|
 servo = Servo(pin=21, min=500, max=2500, max_angle=180)           # Définition du servomoteur sur le GPIO 21 avec une largeur d'impulsion de 500 μs pour 0 degré et 2500 μs pour 180 degrés 
 adc0  = machine.ADC(0)                                            # Configuration du light_sensor (capteur de lumière) en analogique sur le Port A0
+'''
 ssid = 'Lumastor'                                                 # Nom du réseau Wi-Fi (Inutile actuellement)
 password = '11092008'                                             # Mot de passe du réseau Wi-Fi (Inutile actuellement)
 NTP_DELTA = 2208988800 + 3600 * 2                                 # Décalage NTP pour UTC+2 (France, Parid GMT+2), donc +2h = +7200 secondes (inutile actuellement)
 host = "fr.pool.ntp.org"                                          # Serveur NTP à utiliser (inutile actuellement)
+'''
 #-----------------------------------------------------------------|
 
 
