@@ -19,8 +19,37 @@ Ensuite, il se connectera à un serveur NTP permettant d'obtenir la date/heure/s
 > - fr.pool.ntp.org
 > - time.google.com
 
+
 ### Ce système a été mis en commentaire car plus fonctionnel dans le code pour un Raspberry Pi Pico W depuis une mise à jour de MicroPython. 
 ### Il peut être utilisé sur un ESP32 à la place.
+
+Ensuite selon la luminosité acutelle (via le détecteur de luminosité ambiant), on change l'orientation des pales du moucharabieh. Notamment ici, si la luminosité est trop faible, on ferme l'ouverture.
+Donc on règle le *SEUIL_FAIBLE* selon se que l'on considère comme "la nuit". Puis on tourne le servomoteur à la position 0°.
+Cela s'applique pour la nuit, le jour (luminère ambiente), ou en canicule/trop forte lumière :
+```
+# Valeurs seuils pour la luminosité
+
+SEUIL_FAIBLE = 1500        # Trop sombre
+SEUIL_FORTE = 64500        # Trop lumineux
+ANGLE_NUIT = 0
+ANGLE_JOUR = 180
+ANGLE_TROP_LUMINEUX = 90
+
+[...]
+
+# Déterminer l'angle voulu en fonction de la luminosité
+        if light_sensor <= SEUIL_FAIBLE:
+            angle_voulu = ANGLE_NUIT
+        
+        elif light_sensor >= SEUIL_FORTE:
+            angle_voulu = ANGLE_TROP_LUMINEUX
+        
+        else:
+            angle_voulu = ANGLE_JOUR
+[...]
+```
+
+Le tout est géré par une transition plus lente dans la suite du code (optionnel aussi mais pour ne pas être brusque lorsque l'on tourne le servo moteur.
 
 ## Objectif principal du projet de fin d'année:
 
