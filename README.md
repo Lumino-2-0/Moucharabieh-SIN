@@ -53,7 +53,7 @@ Le tout est géré par une transition plus lente dans la suite du code (optionne
 
 ## Objectif principal du projet de fin d'année:
 
-*En hiver, favoriser l'impact du rayonnement solaire sur les vitrages pour optimiser les apports gratuits lorsqu'il y a du soleil et limiter les déperditions quand il n'y a pas d'apport solaire.*
-*En été, limiter l'impact du soleil sur les vitrages pour diminuer l'effet de serre et ainsi éviter les surchauffes.*
-*En toutes saisons, favoriser l'éclairage naturel pour limiter les besoins d'éclairage artificiel qui consomment de l'énergie.*
+- *En hiver, favoriser l'impact du rayonnement solaire sur les vitrages pour optimiser les apports gratuits lorsqu'il y a du soleil et limiter les déperditions quand il n'y a pas d'apport solaire.*
+- *En été, limiter l'impact du soleil sur les vitrages pour diminuer l'effet de serre et ainsi éviter les surchauffes.*
+- *En toutes saisons, favoriser l'éclairage naturel pour limiter les besoins d'éclairage artificiel qui consomment de l'énergie.*
 
